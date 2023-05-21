@@ -1,29 +1,22 @@
-name: Motivational Quotes
+name: Build and Test
 on:
-  schedule:
-    - cron: "0 9 * * *"
+  push:
+    branches:
+      - main
 
 jobs:
-  share_quote:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - name: Fetch Motivational Quote
-        run: |
-          # Fetch a motivational quote using an API or use a custom collection
-          quote="This is a sample quote."
-          echo "::set-output name=quote::$quote"
-      - name: Share Motivational Quote
-        uses: actions/github-script@v4
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const quote = "${{ steps.fetch_quote.outputs.quote }}";
-            const message = `✨ Motivational Quote: ${quote}`;
-            const issueNumber = Math.floor(Math.random() * 1000000) + 1;
-            const octokit = context.octokit;
-            octokit.rest.issues.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              title: `Motivational Quote #${issueNumber}`,
-              body: message,
-            });
+          node-version: 14
+      - name: Install dependencies
+        run: npm install
+      - name: Build project
+        run: npm run build
+      - name: Run tests
+        run: npm test
